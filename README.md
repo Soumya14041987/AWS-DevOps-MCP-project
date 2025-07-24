@@ -1,4 +1,15 @@
-# DevOps Tools Installation Guide
+# AWS DevOps MCP Project
+
+This repository contains both DevOps tools installation scripts and Terraform configurations for AWS infrastructure deployment.
+
+## Contents
+
+1. [DevOps Tools Installation](#devops-tools-installation)
+2. [EKS Cluster with Monitoring Stack](#eks-cluster-with-monitoring-stack)
+
+---
+
+## DevOps Tools Installation
 
 This repository contains a shell script for automatically installing essential DevOps tools on Ubuntu/Debian-based systems. The script installs and configures the following tools:
 
@@ -9,7 +20,7 @@ This repository contains a shell script for automatically installing essential D
 - Minikube (Local Kubernetes Cluster)
 - Helm (Kubernetes Package Manager)
 
-## Prerequisites
+### Prerequisites
 
 - Ubuntu/Debian-based Linux distribution
 - Sudo privileges
@@ -17,11 +28,12 @@ This repository contains a shell script for automatically installing essential D
 - At least 4GB of free disk space
 - At least 4GB of RAM (recommended for Minikube)
 
-## Installation
+### Installation
 
-1. Clone this repository or download the script:
+1. Clone this repository:
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/Soumya14041987/AWS-DevOps-MCP-project.git
+   cd AWS-DevOps-MCP-project
    ```
 
 2. Make the script executable:
@@ -34,7 +46,7 @@ This repository contains a shell script for automatically installing essential D
    ./tools-install.sh
    ```
 
-## What the Script Does
+### What the Script Does
 
 The installation script performs the following actions:
 
@@ -49,25 +61,25 @@ The installation script performs the following actions:
    - Helm for Kubernetes package management
 4. Verifies the installation of each tool
 
-## Post-Installation Setup
+### Post-Installation Setup
 
-### AWS CLI Configuration
+#### AWS CLI Configuration
 ```bash
 aws configure
 ```
 Enter your AWS credentials when prompted.
 
-### Minikube Start
+#### Minikube Start
 ```bash
 minikube start
 ```
 
-### Verify Kubernetes Connection
+#### Verify Kubernetes Connection
 ```bash
 kubectl cluster-info
 ```
 
-## Tool Versions
+### Tool Versions
 
 The script installs the latest stable versions of all tools. To check versions:
 
@@ -80,7 +92,7 @@ minikube version
 helm version
 ```
 
-## Troubleshooting
+### Troubleshooting
 
 Common issues and solutions:
 
@@ -97,7 +109,7 @@ Common issues and solutions:
    - Verify your AWS credentials
    - Check your internet connection
 
-## Uninstallation
+### Uninstallation
 
 To remove the installed tools:
 
@@ -106,6 +118,84 @@ sudo apt-get remove git terraform helm
 sudo rm -rf /usr/local/bin/kubectl /usr/local/bin/minikube
 sudo rm -rf /usr/local/aws-cli
 ```
+
+---
+
+## EKS Cluster with Monitoring Stack
+
+This repository also contains Terraform configurations to deploy an Amazon EKS cluster with the following components:
+
+- AWS VPC CNI add-on
+- Prometheus monitoring
+- Grafana dashboards
+
+### Module Structure
+
+```
+terraform/
+├── modules/
+│   └── eks/
+│       ├── main.tf
+│       ├── variables.tf
+│       ├── outputs.tf
+│       └── versions.tf
+└── environments/
+    └── dev/
+        ├── main.tf
+        └── versions.tf
+```
+
+### Prerequisites
+
+- AWS CLI configured
+- Terraform >= 1.0
+- kubectl installed
+- helm installed
+
+### Usage
+
+1. Update the VPC and subnet IDs in `terraform/environments/dev/main.tf`
+2. Configure your S3 backend in `terraform/environments/dev/versions.tf`
+3. Initialize and apply Terraform:
+
+```bash
+cd terraform/environments/dev
+terraform init
+terraform plan
+terraform apply
+```
+
+### Accessing Grafana
+
+1. Get the Grafana admin password:
+```bash
+kubectl get secret -n monitoring prometheus-grafana -o jsonpath='{.data.admin-password}' | base64 -d
+```
+
+2. Port forward Grafana service:
+```bash
+kubectl port-forward -n monitoring svc/prometheus-grafana 8080:80
+```
+
+3. Access Grafana at: http://localhost:8080
+   - Username: admin
+   - Password: [from step 1]
+
+### Monitoring
+
+The deployment includes:
+- Prometheus for metrics collection
+- Grafana for visualization
+- Pre-configured dashboards for Kubernetes monitoring
+
+### Clean Up
+
+To destroy the infrastructure:
+```bash
+terraform destroy
+```
+
+---
 
 ## Additional Resources
 
@@ -125,4 +215,4 @@ For issues and questions:
 
 ## License
 
-This script is provided under the MIT License. Feel free to modify and distribute it as needed.
+This project is provided under the MIT License. Feel free to modify and distribute it as needed.
